@@ -111,7 +111,7 @@ touch /sdcard/dsh/poke.disabled   # 下次重启生效
 
 | 贡献者 | 负责 |
 | --- | --- |
-| [chenyicheng233-dev](https://github.com/chenyicheng233-dev) | 需求定义、方案选型、全部设计决策与审阅 |
+| [fssama](https://github.com/fssama) | 需求定义、方案选型、全部设计决策与审阅 |
 | DSH agent（`deepseek-flash`，运行于 DeepSeek Harness 容器内） | 实现、测试、文档 |
 
 > **贡献者 ≠ 版权人。** 版权由 LICENSE 中记载的主体持有；本表只如实记录谁做了什么。
