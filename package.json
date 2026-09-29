@@ -1,6 +1,6 @@
 {
   "name": "dsh-poke",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "DSH 插件：agent 提问时自动把 DSH App 顶到前台，失败则发通知兜底。Focused foreground + notification fallback for DeepSeek Harness.",
   "type": "module",
   "main": "index.js",

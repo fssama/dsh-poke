@@ -29,6 +29,8 @@ const DEFAULTS = {
   guiPort: 3080,
   helperPort: 3081,
   tickMs: 45000,
+  discoverWaitMs: 60000,
+  warmTimeoutMs: 120000,
   focusWaitMs: 1300,
   notify: true,
 }
@@ -89,7 +91,7 @@ function safeText(value, limit = 180) {
 
 /** 按配置造出一组动作，避免到处传 cfg。 */
 function makeOps(cfg) {
-  const adbShell = (cmd) => run('bash', [cfg.adbScript, 'shell', cmd])
+  const adbShell = (cmd, timeout) => run('bash', [cfg.adbScript, 'shell', cmd], timeout)
 
   const ensureHelper = async () => {
     if (await portOpen(cfg.helperPort)) return true
@@ -98,10 +100,21 @@ function makeOps(cfg) {
     return portOpen(cfg.helperPort)
   }
 
-  const focusApp = () => adbShell(`am start -n ${cfg.activity}`)
+  // 后台预热 adb 端口缓存。
+  // 端口变化后 adb.sh 要扫 loopback（约 40-50 秒），而普通调用只有 12 秒超时，
+  // 会被中途杀掉导致缓存永远写不进去。这里用长超时、去重、不阻塞地跑一次，
+  // 让缓存在真正被需要之前就绪。
+  let warming = false
+  const warmAdb = () => {
+    if (warming) return
+    warming = true
+    run('bash', [cfg.adbScript, 'shell', 'true'], cfg.warmTimeoutMs).then(() => { warming = false })
+  }
+
+  const focusApp = () => adbShell(`am start -n ${cfg.activity}`, cfg.discoverWaitMs)
 
   const currentFocus = async () => {
-    const r = await adbShell('dumpsys window')
+    const r = await adbShell('dumpsys window', cfg.discoverWaitMs)
     const m = r.out.match(/mCurrentFocus=Window\{[^}]*\s([A-Za-z0-9_.]+)\//)
     return m ? m[1] : ''
   }
@@ -132,7 +145,7 @@ function makeOps(cfg) {
     ].join('\n')
   }
 
-  return { adbShell, ensureHelper, focusApp, currentFocus, notify, statusReport }
+  return { adbShell, ensureHelper, warmAdb, focusApp, currentFocus, notify, statusReport }
 }
 
 export function apply(ctx, config) {
@@ -174,7 +187,7 @@ export function apply(ctx, config) {
 
     // 2) 链路守护（Cordis effect 保证随 fiber 释放）
     try {
-      const tick = () => { void ops.ensureHelper().catch(() => {}) }
+      const tick = () => { void ops.ensureHelper().catch(() => {}); ops.warmAdb() }
       ctx.effect(() => {
         const timer = setInterval(tick, cfg.tickMs)
         tick()
