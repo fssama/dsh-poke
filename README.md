@@ -1,4 +1,4 @@
-# dsh-pclink
+# dsh-poke
 
 **DeepSeek Harness 插件：agent 每次向你提问时，自动把 DSH App 顶到前台。**
 
@@ -24,19 +24,19 @@
 
 两个模型可见工具：
 
-- `pclink_status` —— 体检整条链路（GUI 端口 / 凭据投递页 / adb 通道 / 认证栅栏 / 当前前台）
-- `pclink_focus` —— 立刻把 DSH App 切到前台
+- `poke_status` —— 体检整条链路（GUI 端口 / 凭据投递页 / adb 通道 / 认证栅栏 / 当前前台）
+- `poke_focus` —— 立刻把 DSH App 切到前台
 
 ## 安装
 
 ```bash
-dsh plugin --profile web add dsh-pclink
+dsh plugin --profile web add dsh-poke
 ```
 
 或从本地目录：
 
 ```bash
-dsh plugin --profile web add file:/path/to/dsh-pclink
+dsh plugin --profile web add file:/path/to/dsh-poke
 ```
 
 装完**重启一次 DSH**（新增 bundle 通常需要重组；若 profile 开了 HMR，可能直接热加载）。
@@ -46,15 +46,15 @@ dsh plugin --profile web add file:/path/to/dsh-pclink
 写在 profile 的 `cordis.patch.yml` 里：
 
 ```yaml
-- id: pclink
-  name: dsh-pclink
+- id: poke
+  name: dsh-poke
   config:
     appId: com.dshmobile.probe
     activity: com.dshmobile.probe/.MainActivity
     adbScript: /sdcard/dsh/adb.sh      # 能跑 `am` / `cmd` / `dumpsys` 的脚本
     helperScript: /root/tunnel/serve-cookie.js
     helperLog: /root/tunnel/cookie.log
-    killSwitch: /sdcard/dsh/pclink.disabled
+    killSwitch: /sdcard/dsh/poke.disabled
     guiPort: 3080
     helperPort: 3081
     tickMs: 45000
@@ -97,7 +97,7 @@ dsh plugin --profile web add file:/path/to/dsh-pclink
 一键静默：
 
 ```bash
-touch /sdcard/dsh/pclink.disabled   # 下次重启生效
+touch /sdcard/dsh/poke.disabled   # 下次重启生效
 ```
 
 ## 已知限制

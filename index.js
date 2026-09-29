@@ -1,9 +1,9 @@
-// dsh-pclink —— 把手机端 DSH 与你在 PC 上的浏览器联动起来。
+// dsh-poke —— 把手机端 DSH 与你在 PC 上的浏览器联动起来。
 //
 // 做三件事：
 //   1) agent 每次要向你提问时，自动把 DSH App 顶到前台；若没顶成功，补一条通知兜底。
 //   2) 守住手机侧链路：adb 通道（adbScript 自带重连）+ 凭据投递页进程守护。
-//   3) 提供 pclink_status / pclink_focus 两个工具。
+//   3) 提供 poke_status / poke_focus 两个工具。
 //
 // 两条必须遵守的设计约束：
 //   - apply() 绝不抛异常。插件加载失败会让整个 profile 起不来，而 DSH 是唯一的对话通道。
@@ -15,7 +15,7 @@ import fs from 'node:fs'
 import { execFile } from 'node:child_process'
 import { defineTool } from '@deepseek-ai/dsh-tools'
 
-export const name = 'pclink'
+export const name = 'poke'
 export const inject = ['tools']
 
 const DEFAULTS = {
@@ -24,7 +24,8 @@ const DEFAULTS = {
   adbScript: '/sdcard/dsh/adb.sh',
   helperScript: '/root/tunnel/serve-cookie.js',
   helperLog: '/root/tunnel/cookie.log',
-  killSwitch: '/sdcard/dsh/pclink.disabled',
+  killSwitch: '/sdcard/dsh/poke.disabled',
+  legacyKillSwitch: '/sdcard/dsh/pclink.disabled',
   guiPort: 3080,
   helperPort: 3081,
   tickMs: 45000,
@@ -43,7 +44,7 @@ function resolveConfig(ctx, config) {
   return merged
 }
 
-const TAG = '[pclink] '
+const TAG = '[poke] '
 function note(ctx, msg) {
   try { ctx.logger?.info?.(TAG + msg) } catch { /* 日志失败也不能影响启动 */ }
 }
@@ -109,7 +110,7 @@ function makeOps(cfg) {
     if (!cfg.notify) return Promise.resolve({ ok: true, out: '', err: '' })
     const t = safeText(title, 60)
     const b = safeText(text)
-    return adbShell(`cmd notification post -S bigtext -t '${t}' dsh_pclink '${b}'`)
+    return adbShell(`cmd notification post -S bigtext -t '${t}' dsh_poke '${b}'`)
   }
 
   const statusReport = async () => {
@@ -138,8 +139,9 @@ export function apply(ctx, config) {
   try {
     const cfg = resolveConfig(ctx, config)
 
-    if (fs.existsSync(cfg.killSwitch)) {
-      note(ctx, '检测到 ' + cfg.killSwitch + '，插件保持静默')
+    const hitKill = [cfg.killSwitch, cfg.legacyKillSwitch].find((p) => p && fs.existsSync(p))
+    if (hitKill) {
+      note(ctx, '检测到 ' + hitKill + '，插件保持静默')
       return
     }
 
@@ -177,7 +179,7 @@ export function apply(ctx, config) {
         const timer = setInterval(tick, cfg.tickMs)
         tick()
         return () => clearInterval(timer)
-      }, 'pclink: 凭据投递页守护')
+      }, 'poke: 凭据投递页守护')
       note(ctx, `链路守护已启动（每 ${cfg.tickMs} ms）`)
     } catch (e) {
       note(ctx, '启动守护失败: ' + String((e && e.message) || e))
@@ -187,14 +189,14 @@ export function apply(ctx, config) {
     try {
       const textOutput = { schema: { type: 'string' }, render: (_args, value) => [{ type: 'text', text: String(value) }] }
       ctx.tools.register(defineTool({
-        name: 'pclink_status',
+        name: 'poke_status',
         description: '体检「手机 DSH ↔ PC 浏览器」链路：GUI 端口、凭据投递页、adb 通道、认证栅栏、当前前台。链路出问题先跑这个。',
         parameters: {},
         output: textOutput,
         async execute() { return await ops.statusReport() },
       }))
       ctx.tools.register(defineTool({
-        name: 'pclink_focus',
+        name: 'poke_focus',
         description: '立刻把手机上的 DSH App 切到前台（用户看不到对话时用）。',
         parameters: {},
         output: textOutput,
@@ -205,7 +207,7 @@ export function apply(ctx, config) {
           return `聚焦指令: ${r.ok ? '已发送' : '失败 ' + r.err.slice(0, 80)}\n当前前台: ${fg || '未知'}`
         },
       }))
-      note(ctx, '工具已注册: pclink_status / pclink_focus')
+      note(ctx, '工具已注册: poke_status / poke_focus')
     } catch (e) {
       note(ctx, '注册工具失败: ' + String((e && e.message) || e))
     }
