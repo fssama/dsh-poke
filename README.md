@@ -30,7 +30,7 @@
 ## 安装
 
 ```bash
-dsh plugin --profile web add dsh-poke
+dsh plugin --profile web add github:fssama/dsh-poke
 ```
 
 或从本地目录：
@@ -38,6 +38,8 @@ dsh plugin --profile web add dsh-poke
 ```bash
 dsh plugin --profile web add file:/path/to/dsh-poke
 ```
+
+> 尚未发布到 npm。发布后即可简化为 `dsh plugin --profile web add dsh-poke`。
 
 装完**重启一次 DSH**（新增 bundle 通常需要重组；若 profile 开了 HMR，可能直接热加载）。
 

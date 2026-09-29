@@ -26,5 +26,13 @@
     "poke",
     "notify"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fssama/dsh-poke.git"
+  },
+  "bugs": {
+    "url": "https://github.com/fssama/dsh-poke/issues"
+  },
+  "homepage": "https://github.com/fssama/dsh-poke#readme"
 }
