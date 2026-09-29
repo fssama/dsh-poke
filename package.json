@@ -1,0 +1,16 @@
+{
+  "name": "dsh-pclink",
+  "version": "1.0.0",
+  "description": "把手机端 DSH 与 PC 浏览器联动：提问时自动把 DSH 顶到前台、守护 adb 与凭据投递链路。",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": ["index.js", "cordis.patch.yml", "README.md"],
+  "dsh": { "bundle": { "patch": "./cordis.patch.yml" } },
+  "keywords": ["dsh", "dsh-plugin", "android", "pclink"],
+  "license": "MIT"
+}

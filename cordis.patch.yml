@@ -1,0 +1,5 @@
+# dsh-pclink 的配置层。
+# id 必须与 index.js 里的 `export const name` 完全一致（都是 pclink），否则会静默不生效。
+- insert:
+    - id: pclink
+      name: dsh-pclink
