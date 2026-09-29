@@ -107,6 +107,16 @@ touch /sdcard/dsh/pclink.disabled   # 下次重启生效
 - 只对 `web` profile 有意义（需要一个能看到 UI 的前台）。
 - 硬编码的默认路径是 Android 容器的布局，移植请改配置。
 
+## Contributors
+
+| 贡献者 | 负责 |
+| --- | --- |
+| [chenyicheng233-dev](https://github.com/chenyicheng233-dev) | 需求定义、方案选型、全部设计决策与审阅 |
+| DSH agent（`deepseek-flash`，运行于 DeepSeek Harness 容器内） | 实现、测试、文档 |
+
+> **贡献者 ≠ 版权人。** 版权由 LICENSE 中记载的主体持有；本表只如实记录谁做了什么。
+> 创作过程的说明见下方 Authoring。
+
 ## Authoring
 
 本插件由用户与其设备上的 DSH agent 协作完成：
